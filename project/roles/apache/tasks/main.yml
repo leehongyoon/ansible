@@ -1,0 +1,34 @@
+---
+# tasks file for roles/apache
+- name: Install packages - httpd, mod_ssl, firewalld
+  yum:
+    name:
+      - httpd
+      - mod_ssl
+      - firewalld
+    state: present
+
+- name: Configure web server - /var/www/html/index.html
+  template:
+    src: templates/index.html.j2
+    dest: /var/www/html/index.html
+
+- name: Start the service - httpd, firewalld
+  service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  loop:
+    - httpd
+    - firewalld
+
+- name: Open the port with firewalld - http, https
+  firewalld:
+    service: "{{ item }}"
+    zone: public
+    permanent: yes
+    immediate: yes
+    state: enabled
+  loop:
+    - http
+    - https
